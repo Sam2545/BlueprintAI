@@ -16,7 +16,12 @@ class OpenRouterProvider(Provider):
         model: str | None = None,
         timeout: float = 60.0,
     ):
-        self.api_key = api_key or os.environ["OPENROUTER_API_KEY"]
+        env_key = os.environ.get("OPENROUTER_API_KEY")
+        if not api_key and not env_key:
+            raise RuntimeError(
+                "OPENROUTER_API_KEY not set; add it to your .env file"
+            )
+        self.api_key = api_key or env_key
         self.model = model or os.environ.get("OPENROUTER_MODEL", DEFAULT_MODEL)
         self.timeout = timeout
 

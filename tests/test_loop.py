@@ -47,6 +47,35 @@ def test_reject_marks_rejected():
     assert convo.state.requirements[0].status == ItemStatus.rejected
 
 
+def test_approve_all_promotes_all_proposed_items():
+    fake = FakeProvider([
+        '{"edits": [{"op": "add_requirement", "description": "notify parent"}, '
+        '{"op": "add_constraint", "description": "budget"}, '
+        '{"op": "add_decision", "topic": "Platform", "choice": "Mobile", "reason": "x"}], '
+        '"question": "ok?", "done": false}'
+    ])
+    convo = Conversation(fake)
+    convo.send("reminder app")
+    assert convo.approve_all() == 3
+    assert convo.state.requirements[0].status == ItemStatus.approved
+    assert convo.state.constraints[0].status == ItemStatus.approved
+    assert convo.state.decisions[0].status == ItemStatus.approved
+    assert convo.state.decisions[0].approvedBy == "user"
+
+
+def test_reject_all_rejects_all_proposed_items():
+    fake = FakeProvider([
+        '{"edits": [{"op": "add_requirement", "description": "notify parent"}, '
+        '{"op": "add_constraint", "description": "budget"}], '
+        '"question": "ok?", "done": false}'
+    ])
+    convo = Conversation(fake)
+    convo.send("reminder app")
+    assert convo.reject_all() == 2
+    assert convo.state.requirements[0].status == ItemStatus.rejected
+    assert convo.state.constraints[0].status == ItemStatus.rejected
+
+
 def test_save_appends_artifact_and_bumps_version():
     fake = FakeProvider([
         '{"edits": [{"op": "set_summary", "summary": "an app"}], "question": "q?", "done": false}'

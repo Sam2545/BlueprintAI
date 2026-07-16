@@ -1,3 +1,5 @@
+import pytest
+
 from backend.core.loop import Conversation
 from tests.evals.judge import transcript_to_text, score_transcript
 from tests.fakes.provider import FakeProvider
@@ -31,3 +33,9 @@ def test_score_transcript_parses_judge_json():
     sent = judge.calls[0][-1].content
     assert "RUBRIC TEXT" in sent
     assert "Who is the primary user?" in sent
+
+
+def test_score_transcript_raises_on_no_json():
+    judge = FakeProvider(["no json here"])
+    with pytest.raises(ValueError, match="no JSON object"):
+        score_transcript(_convo_with_one_turn(), "RUBRIC TEXT", judge)

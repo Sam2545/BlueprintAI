@@ -100,7 +100,7 @@ def apply_edits(state: SessionState, edits: list, source: str) -> list[str]:
             changes.append(f"+ decision {did} (proposed)")
         elif isinstance(e, AnswerQuestionOp):
             for q in state.openQuestions:
-                if q.id == e.id:
+                if q.id == e.id and q.status == QuestionStatus.open:
                     q.answer = e.answer
                     q.status = QuestionStatus.answered
                     changes.append(f"answered {q.id}")
