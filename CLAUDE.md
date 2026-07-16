@@ -34,16 +34,18 @@ BlueprintAI/
 **Data flow:** Frontend renders a two-pane workspace (chat stream on the left, live design-document preview on the right). It calls the backend, which runs the active agent(s) via LangGraph and **streams tokens/events back over Server-Sent Events (SSE)**. Sessions, messages, and the evolving design doc are persisted to Postgres. WebSockets may replace SSE later if bidirectional needs arise.
 
 **Data model (MVP, keep small):**
-- `Session` — the idea, status.
+- `Session` — the idea, status, and the shared project state.
 - `Message` — role, agent, content.
-- `DesignDoc` — markdown body, version.
+- **Session state** — the structured, source-of-truth JSON the agents read and write (project, requirements, constraints, decisions, open questions, artifacts), stored as a single JSONB blob. The markdown design doc is *rendered from* this state, not stored separately. Full schema in `docs/sessionModel.md`.
 
 ## Milestones
 
 Build in this order. Each milestone should be independently runnable and tested before moving on.
 
 - **M0 — Scaffold.** Monorepo skeleton, Docker Compose (frontend + backend + postgres), FastAPI health endpoint, Next.js landing page, Alembic wired up. `docker compose up` brings the stack online.
-- **M1 — Single PM agent, end to end (the MVP).** Landing "What do you want to build?" → workspace with chat + live doc preview → Project Manager agent (via provider abstraction + LangGraph single-node graph) runs the full guided Q&A → design doc builds live via SSE → **Save/Export** produces a shareable `.md`. This delivers the entire happy path in `docs/productFlow.md`.
+- **M1 — Single PM agent (the MVP).** Built **terminal-first**, then given a UI. The shared session-state model this operates on is already defined (`docs/sessionModel.md`).
+  - **M1a — PM agent in the terminal (no frontend).** A model-provider abstraction (OpenRouter default) plus a single Project Manager agent that runs the guided, one-question-at-a-time Q&A over the session-state model. Runs two ways from one core loop: an **interactive REPL** you converse with, and a **scripted mode** that replays a fixed transcript. **Save/Export** renders a shareable `.md` from the state. Agent logic is testable without live model calls (mocked provider) alongside scripted-transcript checks on the output.
+  - **M1b — Web workspace.** Landing "What do you want to build?" → two-pane workspace (chat + live doc preview) → the same PM agent behind FastAPI (LangGraph single-node graph), streaming over SSE → **Save/Export**. Delivers the full happy path in `docs/productFlow.md`.
 - **M2 — Add the Architect.** Second agent behind the same interface; introduce a real LangGraph handoff (PM → Architect). Independently tested.
 - **M3 — Add the Implementation Lead.** Turns the approach into concrete tasks and milestones in the doc.
 - **M4 — Add the Reviewer.** Critiques the doc for gaps/risks before save.
