@@ -1,0 +1,8 @@
+{
+  "idea": "A mobile app that reminds parents when their kids' library books are due.",
+  "answers": [
+    "The parent is the primary user; a family tracks about five books at once.",
+    "Manual entry and barcode scan both, but manual entry is the must-have for v1.",
+    "Success means zero late fees for a family over a school term."
+  ]
+}
