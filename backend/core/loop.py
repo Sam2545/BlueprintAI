@@ -64,6 +64,30 @@ class Conversation:
         self.state.updatedAt = now_iso()
         return True
 
+    def approve_all(self) -> int:
+        count = 0
+        for coll in (self.state.requirements, self.state.constraints, self.state.decisions):
+            for item in coll:
+                if item.status == ItemStatus.proposed:
+                    item.status = ItemStatus.approved
+                    if hasattr(item, "approvedBy"):
+                        item.approvedBy = "user"
+                    count += 1
+        if count:
+            self.state.updatedAt = now_iso()
+        return count
+
+    def reject_all(self) -> int:
+        count = 0
+        for coll in (self.state.requirements, self.state.constraints, self.state.decisions):
+            for item in coll:
+                if item.status == ItemStatus.proposed:
+                    item.status = ItemStatus.rejected
+                    count += 1
+        if count:
+            self.state.updatedAt = now_iso()
+        return count
+
     def save(self) -> Artifact:
         content = render_design_doc(self.state)
         version = max((a.version for a in self.state.artifacts), default=0) + 1

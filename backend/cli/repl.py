@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import sys
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -22,9 +21,15 @@ def parse_command(line: str) -> tuple[str, str]:
 
 def handle_command(convo: Conversation, command: str, arg: str) -> str:
     if command == "approve":
+        if arg == "all":
+            count = convo.approve_all()
+            return f"approved {count} item(s)"
         ok = convo.approve(arg)
         return f"approved {arg}" if ok else f"no such item: {arg}"
     if command == "reject":
+        if arg == "all":
+            count = convo.reject_all()
+            return f"rejected {count} item(s)"
         ok = convo.reject(arg)
         return f"rejected {arg}" if ok else f"no such item: {arg}"
     if command == "doc":
@@ -49,13 +54,13 @@ def _say(convo: Conversation, text: str) -> str:
     return "\n".join(lines)
 
 
-def main(argv: list[str] | None = None) -> int:
+def main() -> int:
     load_dotenv()
     from backend.providers.openrouter import OpenRouterProvider
 
     convo = Conversation(OpenRouterProvider())
     print("BlueprintAI — Project Manager (terminal). Describe what you want to build.")
-    print("Commands: approve <id>, reject <id>, doc, save [file], quit\n")
+    print("Commands: approve <id|all>, reject <id|all>, doc, save [file], quit\n")
     while True:
         try:
             line = input("> ")

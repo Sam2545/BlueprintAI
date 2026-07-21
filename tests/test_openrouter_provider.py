@@ -1,4 +1,5 @@
 import httpx
+import pytest
 
 from backend.providers.base import Message
 from backend.providers.openrouter import OpenRouterProvider
@@ -34,3 +35,9 @@ def test_reads_key_and_model_from_env(monkeypatch):
     provider = OpenRouterProvider()
     assert provider.api_key == "env-key"
     assert provider.model == "env-model"
+
+
+def test_missing_api_key_raises_actionable_runtime_error(monkeypatch):
+    monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
+    with pytest.raises(RuntimeError, match="OPENROUTER_API_KEY not set"):
+        OpenRouterProvider()

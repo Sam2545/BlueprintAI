@@ -36,6 +36,8 @@ def score_transcript(convo: Conversation, rubric: str, provider: Provider) -> di
         Message(role="user", content=prompt),
     ])
     start, end = raw.find("{"), raw.rfind("}")
+    if start == -1 or end == -1 or end < start:
+        raise ValueError(f"judge response contained no JSON object: {raw!r}")
     return json.loads(raw[start:end + 1])
 
 

@@ -26,6 +26,19 @@ def test_handle_approve_promotes_item():
     assert convo.state.requirements[0].status.value == "approved"
 
 
+def test_handle_approve_all_promotes_all_proposed():
+    fake = FakeProvider([
+        '{"edits": [{"op": "add_requirement", "description": "notify"}, '
+        '{"op": "add_constraint", "description": "budget"}], "question": "q?", "done": false}'
+    ])
+    convo = Conversation(fake)
+    convo.send("app")
+    out = handle_command(convo, "approve", "all")
+    assert "2" in out
+    assert convo.state.requirements[0].status.value == "approved"
+    assert convo.state.constraints[0].status.value == "approved"
+
+
 def test_handle_doc_returns_markdown():
     convo = Conversation(FakeProvider([]))
     out = handle_command(convo, "doc", "")
